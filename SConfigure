@@ -1,0 +1,60 @@
+import platform, os
+from config import packages, cc
+
+#
+# Add options to be passed on to build.
+#
+
+options = [
+    ('--prefix', 'prefix', 'Installation prefix.', '/usr/local'),
+    ('--build-dir', 'build_dir', 'Sandbox location.', 'build'),
+    ('--with-debug', 'with_debug', 'Build with debugging', 0, 'int'),
+    ('--static-libs', 'static_libs', 'Enable static libraries', 1, 'int'),
+    ('--shared-libs', 'shared_libs', 'Enable shared libraries', 1, 'int'),
+    ('--cc', 'CC', 'C compiler', None),
+    ('--cflags', 'CFLAGS', 'Flags for the C compiler', None),
+]
+
+#
+# Setup the environment.
+#
+
+env = Environment(ENV=os.environ)
+env.Tool('config', toolpath=['config'], options=options)
+
+#
+# Declare which packages we're going to use.
+#
+
+
+#
+# Perform configuration.
+#
+
+if not (GetOption('help') or GetOption('clean')):
+
+    if env.get('CC', None) is not None:
+        cc.apply_cc(env, env['CC'])
+
+    if env.get('with_debug', None):
+        env.MergeFlags('-g -DDEBUG')
+    else:
+        env.MergeFlags('-O2 -DNDEBUG')
+
+#
+# Export the environment.
+#
+
+env.PrintSummary()
+env.SaveConfig()
+
+#
+# Print success message.
+#
+
+print
+print '***************************************'
+print '* Successfully configured.            *'
+print '* Now run \'scons\' to build.           *'
+print '***************************************'
+print
